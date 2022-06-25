@@ -44,6 +44,9 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  IconBox: {
+    textAlign: "center",
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -63,11 +66,12 @@ const Auth: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassWord] = useState("");
   const [userName, setUsername] = useState("");
-  const [avaterImage, setAvaterImage] = useState<File | null>(null);
+  const [avatarImage, setavatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState(true);
+
   const onChangeImageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files![0]) {
-      setAvaterImage(e.target.files![0]);
+      setavatarImage(e.target.files![0]);
       e.target.value = "";
     }
   };
@@ -79,15 +83,15 @@ const Auth: React.FC = () => {
   const signUpEmail = async () => {
     const authUser = await auth.createUserWithEmailAndPassword(email, password);
     let url = "";
-    if (avaterImage) {
+    if (avatarImage) {
       const S =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       const N = 16;
       const randomChar = Array.from(crypto.getRandomValues(new Uint32Array(N)))
         .map((n) => S[n % S.length])
         .join("");
-      const fileName = randomChar + "_" + avaterImage.name;
-      await storage.ref(`avaters/${fileName}`).put(avaterImage);
+      const fileName = randomChar + "_" + avatarImage.name;
+      await storage.ref(`avaters/${fileName}`).put(avatarImage);
       url = await storage.ref("avaters").child(fileName).getDownloadURL();
     }
     await authUser.user?.updateProfile({
@@ -117,6 +121,44 @@ const Auth: React.FC = () => {
             {isLogin ? "ログイン" : "会員登録"}
           </Typography>
           <form className={classes.form} noValidate>
+            {!isLogin && (
+              <>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="username"
+                  label="Username"
+                  name="username"
+                  autoComplete="username"
+                  autoFocus
+                  value={userName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setUsername(e.target.value);
+                  }}
+                />
+                <Box className={classes.IconBox}>
+                  <IconButton>
+                    <label>
+                      <AccountCircleIcon
+                        fontSize="large"
+                        className={
+                          avatarImage
+                            ? styles.login_addIconLoaded
+                            : styles.login_addIcon
+                        }
+                      />
+                      <input
+                        className={styles.login_hiddenIcon}
+                        type="file"
+                        onChange={onChangeImageHandler}
+                      />
+                    </label>
+                  </IconButton>
+                </Box>
+              </>
+            )}
             <TextField
               variant="outlined"
               margin="normal"
